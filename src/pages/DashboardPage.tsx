@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Card } from '../../components/ui/Card';
-import { fetchEventReservationsApi } from '../../api/eventReservationApi';
-import { fetchReservationsApi } from '../../api/reservationApi';
-import { fetchCustomersApi } from '../../api/customerApi';
-import { fetchEventsApi } from '../../api/eventApi';
+import { Card } from '../components/ui/card';
+import { fetchEventReservationsApi } from '../api/eventReservations.api';
+import { fetchReservationsApi } from '../api/reservations.api';
+import { fetchCustomersApi } from '../api/customers.api';
+import { fetchEventsApi } from '../api/events.api';
 
-export default function Dashboard() {
+export default function DashboardPage() {
     const [stats, setStats] = useState({ reservationsToday: 0, totalCustomers: 0, activeEvents: 0, totalRevenue: 0 });
 
     useEffect(() => {

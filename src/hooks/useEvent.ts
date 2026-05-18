@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { Event } from '../types/Event';
-import { fetchEventsApi, fetchDeletedEventsApi, createEventApi, updateEventApi, deleteEventApi, restoreEventApi } from '../api/eventApi';
+import { fetchEventsApi, fetchDeletedEventsApi, createEventApi, updateEventApi, deleteEventApi, restoreEventApi } from '../api/events.api';
 
 export function useEvents() {
     const [events, setEvents] = useState<Event[]>([]);

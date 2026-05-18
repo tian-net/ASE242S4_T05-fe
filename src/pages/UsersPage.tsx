@@ -1,16 +1,16 @@
 import { useState } from 'react';
-import { useUsers } from '../../hooks/useUser';
-import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
-import { Modal } from '../../components/ui/Modal';
-import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
-import { Badge } from '../../components/ui/Badge';
-import { Table } from '../../components/ui/Table';
-import { SearchBar } from '../../components/ui/SearchBar';
-import { FilterSelect } from '../../components/ui/FilterSelect';
-import { required, email, minLength, lettersOnly } from '../../lib/validation';
+import { useUsers } from '../hooks/useUser';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Modal } from '../components/ui/modal';
+import { ConfirmDialog } from '../components/ui/confirm-dialog';
+import { Badge } from '../components/ui/badge';
+import { DataTable } from '../components/shared/DataTable';
+import { SearchBar } from '../components/ui/search-bar';
+import { FilterSelect } from '../components/ui/filter-select';
+import { required, email, minLength, lettersOnly } from '../lib/validation';
 
-export default function Users() {
+export default function UsersPage() {
     const { users, deleted, loading, create, update, remove, restore, reload } = useUsers();
     const [modal, setModal] = useState<{ open: boolean; edit?: any }>({ open: false });
     const [confirm, setConfirm] = useState<{ open: boolean; title: string; message: string; onConfirm: () => void }>({ open: false, title: '', message: '', onConfirm: () => {} });
@@ -86,7 +86,7 @@ export default function Users() {
                 <FilterSelect label="Estado" value={statusFilter} onChange={setStatusFilter} options={[{ value: '', label: 'Todos' }, { value: 'activo', label: 'Activo' }, { value: 'inactivo', label: 'Inactivo' }]} />
             </div>
             <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-                <Table
+                <DataTable
                     headers={['Nombre', 'Email', 'Rol', 'Estado', 'Acciones']}
                     rows={filtered.map((u: any) => [
                         u.fullName,

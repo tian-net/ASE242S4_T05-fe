@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { RestaurantTable } from '../types/RestaurantTable';
-import { fetchTablesApi, fetchDeletedTablesApi, createTableApi, updateTableApi, deleteTableApi, restoreTableApi } from '../api/tableApi';
+import { fetchTablesApi, fetchDeletedTablesApi, createTableApi, updateTableApi, deleteTableApi, restoreTableApi } from '../api/tables.api';
 
 export function useTables() {
     const [tables, setTables] = useState<RestaurantTable[]>([]);

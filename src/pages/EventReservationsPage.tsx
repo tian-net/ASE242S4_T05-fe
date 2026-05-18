@@ -1,21 +1,21 @@
 import { useState, useEffect } from 'react';
-import { fetchEventReservationsApi, fetchDeletedEventReservationsApi, cancelEventReservationApi, restoreEventReservationApi, createEventReservationApi, updateEventReservationApi } from '../../api/eventReservationApi';
-import { fetchCustomersApi } from '../../api/customerApi';
-import { fetchActiveEnabledEventsApi } from '../../api/eventApi';
-import { Button } from '../../components/ui/Button';
-import { Badge } from '../../components/ui/Badge';
-import { Card } from '../../components/ui/Card';
-import { Modal } from '../../components/ui/Modal';
-import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
-import { Input } from '../../components/ui/Input';
-import { SearchBar } from '../../components/ui/SearchBar';
-import { FilterSelect } from '../../components/ui/FilterSelect';
-import { STATUS_COLORS, MINIMUM_HOURS } from '../../lib/constants';
-import { required, futureDate, maxDate, timeAfter, minDuration, positiveNumber } from '../../lib/validation';
+import { fetchEventReservationsApi, fetchDeletedEventReservationsApi, cancelEventReservationApi, restoreEventReservationApi, createEventReservationApi, updateEventReservationApi } from '../api/eventReservations.api';
+import { fetchCustomersApi } from '../api/customers.api';
+import { fetchActiveEnabledEventsApi } from '../api/events.api';
+import { Button } from '../components/ui/button';
+import { Badge } from '../components/ui/badge';
+import { Card } from '../components/ui/card';
+import { Modal } from '../components/ui/modal';
+import { ConfirmDialog } from '../components/ui/confirm-dialog';
+import { Input } from '../components/ui/input';
+import { SearchBar } from '../components/ui/search-bar';
+import { FilterSelect } from '../components/ui/filter-select';
+import { STATUS_COLORS, MINIMUM_HOURS } from '../lib/constants';
+import { required, futureDate, maxDate, timeAfter, minDuration, positiveNumber } from '../lib/validation';
 
 const STATUSES = ['Planificado', 'pendiente', 'Confirmado', 'Cancelado', 'En curso', 'Finalizado'];
 
-export default function EventReservations() {
+export default function EventReservationsPage() {
     const [reservations, setReservations] = useState<any[]>([]);
     const [deleted, setDeleted] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);

@@ -1,9 +1,9 @@
-import { useAuth } from '../../contexts/AuthContext';
-import { Card } from '../../components/ui/Card';
-import { Button } from '../../components/ui/Button';
+import { useAuth } from '../context/AuthContext';
+import { Card } from '../components/ui/card';
+import { Button } from '../components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
-export default function Profile() {
+export default function ProfilePage() {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
 

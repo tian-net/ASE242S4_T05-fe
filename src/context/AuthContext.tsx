@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { AuthResponse } from '../types/AuthResponse';
-import { loginApi } from '../api/userApi';
+import { loginApi } from '../api/auth.api';
 import { TOKEN_KEY, USER_KEY } from '../lib/constants';
 
 interface AuthContextType {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { Customer } from '../types/Customer';
-import { fetchCustomersApi, fetchDeletedCustomersApi, createCustomerApi, updateCustomerApi, deleteCustomerApi, restoreCustomerApi } from '../api/customerApi';
+import { fetchCustomersApi, fetchDeletedCustomersApi, createCustomerApi, updateCustomerApi, deleteCustomerApi, restoreCustomerApi } from '../api/customers.api';
 
 export function useCustomers() {
     const [customers, setCustomers] = useState<Customer[]>([]);

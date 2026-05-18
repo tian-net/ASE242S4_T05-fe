@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import { fetchMyEventReservationsApi, cancelEventReservationApi } from '../../api/eventReservationApi';
-import { Button } from '../../components/ui/Button';
-import { Badge } from '../../components/ui/Badge';
-import { Card } from '../../components/ui/Card';
-import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
-import { STATUS_COLORS } from '../../lib/constants';
+import { useAuth } from '../context/AuthContext';
+import { fetchMyEventReservationsApi, cancelEventReservationApi } from '../api/eventReservations.api';
+import { Button } from '../components/ui/button';
+import { Badge } from '../components/ui/badge';
+import { Card } from '../components/ui/card';
+import { ConfirmDialog } from '../components/ui/confirm-dialog';
+import { STATUS_COLORS } from '../lib/constants';
 import { useNavigate } from 'react-router-dom';
 
-export default function MyReservations() {
+export default function MyReservationsPage() {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [reservations, setReservations] = useState<any[]>([]);

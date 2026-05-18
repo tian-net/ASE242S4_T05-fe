@@ -1,10 +1,10 @@
-interface TableProps {
+interface DataTableProps {
     headers: string[];
     rows: (string | React.ReactNode)[][];
     onRowClick?: (index: number) => void;
 }
 
-export function Table({ headers, rows, onRowClick }: TableProps) {
+export function DataTable({ headers, rows, onRowClick }: DataTableProps) {
     return (
         <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">

@@ -1,19 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { fetchActiveEnabledEventsApi } from '../../api/eventApi';
-import { fetchReservableTablesApi } from '../../api/tableApi';
-import { createReservationApi } from '../../api/reservationApi';
-import { fetchOccupiedTimesApi, createEventReservationApi } from '../../api/eventReservationApi';
-import { Button } from '../../components/ui/Button';
-import { Card } from '../../components/ui/Card';
-import { Stepper } from '../../components/ui/Stepper';
-import { futureDate, timeAfter, minDuration, positiveNumber } from '../../lib/validation';
-import { MINIMUM_HOURS } from '../../lib/constants';
+import { useAuth } from '../context/AuthContext';
+import { fetchActiveEnabledEventsApi } from '../api/events.api';
+import { fetchReservableTablesApi } from '../api/tables.api';
+import { createReservationApi } from '../api/reservations.api';
+import { fetchOccupiedTimesApi, createEventReservationApi } from '../api/eventReservations.api';
+import { Button } from '../components/ui/button';
+import { Card } from '../components/ui/card';
+import { Stepper } from '../components/ui/stepper';
+import { futureDate, timeAfter, minDuration, positiveNumber } from '../lib/validation';
+import { MINIMUM_HOURS } from '../lib/constants';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 
-export default function NewReservation() {
+export default function NewReservationPage() {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [resType, setResType] = useState<'evento' | 'mesa' | null>(null);
@@ -259,7 +259,7 @@ export default function NewReservation() {
                 <Button variant="ghost" onClick={() => { setResType(null); setStep(0); setSelectedEvent(null); }}>← Volver</Button>
                 <h2 className="text-2xl font-bold text-gray-900">Nueva Reserva de Evento</h2>
             </div>
-            <Stepper steps={['Evento', 'Fecha y Hora', 'Confirmar']} current={step} />
+            <Stepper steps={['Evento', 'Fecha y Hora', 'Confirmar']} currentStep={step} />
 
             {step === 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

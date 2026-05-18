@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { User } from '../types/User';
-import { fetchUsersApi, fetchDeletedUsersApi, createUserApi, updateUserApi, deleteUserApi, restoreUserApi } from '../api/userApi';
+import { fetchUsersApi, fetchDeletedUsersApi, createUserApi, updateUserApi, deleteUserApi, restoreUserApi } from '../api/users.api';
 
 export function useUsers() {
     const [users, setUsers] = useState<User[]>([]);

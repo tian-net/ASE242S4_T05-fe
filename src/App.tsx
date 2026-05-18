@@ -1,26 +1,26 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
-import { AdminRoute, ClientRoute } from './components/ProtectedRoute';
-import { Layout } from './components/Layout';
+import { AuthProvider } from './context/AuthContext';
+import { AdminRoute, ClientRoute } from './router/ProtectedRoute';
+import { AppLayout } from './layout/AppLayout';
 
-import Login from './pages/auth/Login';
-import Register from './pages/auth/Register';
-import Dashboard from './pages/admin/Dashboard';
-import Users from './pages/admin/Users';
-import Customers from './pages/admin/Customers';
-import Events from './pages/admin/Events';
-import EventReservations from './pages/admin/EventReservations';
-import Reservations from './pages/admin/Reservations';
-import Tables from './pages/admin/Tables';
-import MyReservations from './pages/cliente/MyReservations';
-import NewReservation from './pages/cliente/NewReservation';
-import EditReservation from './pages/cliente/EditReservation';
-import Profile from './pages/cliente/Profile';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import DashboardPage from './pages/DashboardPage';
+import UsersPage from './pages/UsersPage';
+import CustomersPage from './pages/CustomersPage';
+import EventsPage from './pages/EventsPage';
+import EventReservationsPage from './pages/EventReservationsPage';
+import ReservationsPage from './pages/ReservationsPage';
+import TablesPage from './pages/TablesPage';
+import MyReservationsPage from './pages/MyReservationsPage';
+import NewReservationPage from './pages/NewReservationPage';
+import EditReservationPage from './pages/EditReservationPage';
+import ProfilePage from './pages/ProfilePage';
 
 function AdminWrapped({ children }: { children: React.ReactNode }) {
     return (
         <AdminRoute>
-            <Layout>{children}</Layout>
+            <AppLayout>{children}</AppLayout>
         </AdminRoute>
     );
 }
@@ -28,7 +28,7 @@ function AdminWrapped({ children }: { children: React.ReactNode }) {
 function ClientWrapped({ children }: { children: React.ReactNode }) {
     return (
         <ClientRoute>
-            <Layout>{children}</Layout>
+            <AppLayout>{children}</AppLayout>
         </ClientRoute>
     );
 }
@@ -38,19 +38,19 @@ export default function App() {
         <BrowserRouter>
             <AuthProvider>
                 <Routes>
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/register" element={<Register />} />
-                    <Route path="/admin/dashboard" element={<AdminWrapped><Dashboard /></AdminWrapped>} />
-                    <Route path="/admin/users" element={<AdminWrapped><Users /></AdminWrapped>} />
-                    <Route path="/admin/customers" element={<AdminWrapped><Customers /></AdminWrapped>} />
-                    <Route path="/admin/events" element={<AdminWrapped><Events /></AdminWrapped>} />
-                    <Route path="/admin/event-reservations" element={<AdminWrapped><EventReservations /></AdminWrapped>} />
-                    <Route path="/admin/reservations" element={<AdminWrapped><Reservations /></AdminWrapped>} />
-                    <Route path="/admin/tables" element={<AdminWrapped><Tables /></AdminWrapped>} />
-                    <Route path="/cliente/my-reservations" element={<ClientWrapped><MyReservations /></ClientWrapped>} />
-                    <Route path="/cliente/new-reservation" element={<ClientWrapped><NewReservation /></ClientWrapped>} />
-                    <Route path="/cliente/edit-reservation/:id" element={<ClientWrapped><EditReservation /></ClientWrapped>} />
-                    <Route path="/cliente/profile" element={<ClientWrapped><Profile /></ClientWrapped>} />
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/register" element={<RegisterPage />} />
+                    <Route path="/admin/dashboard" element={<AdminWrapped><DashboardPage /></AdminWrapped>} />
+                    <Route path="/admin/users" element={<AdminWrapped><UsersPage /></AdminWrapped>} />
+                    <Route path="/admin/customers" element={<AdminWrapped><CustomersPage /></AdminWrapped>} />
+                    <Route path="/admin/events" element={<AdminWrapped><EventsPage /></AdminWrapped>} />
+                    <Route path="/admin/event-reservations" element={<AdminWrapped><EventReservationsPage /></AdminWrapped>} />
+                    <Route path="/admin/reservations" element={<AdminWrapped><ReservationsPage /></AdminWrapped>} />
+                    <Route path="/admin/tables" element={<AdminWrapped><TablesPage /></AdminWrapped>} />
+                    <Route path="/cliente/my-reservations" element={<ClientWrapped><MyReservationsPage /></ClientWrapped>} />
+                    <Route path="/cliente/new-reservation" element={<ClientWrapped><NewReservationPage /></ClientWrapped>} />
+                    <Route path="/cliente/edit-reservation/:id" element={<ClientWrapped><EditReservationPage /></ClientWrapped>} />
+                    <Route path="/cliente/profile" element={<ClientWrapped><ProfilePage /></ClientWrapped>} />
                     <Route path="/" element={<Navigate to="/login" replace />} />
                     <Route path="*" element={<Navigate to="/login" replace />} />
                 </Routes>

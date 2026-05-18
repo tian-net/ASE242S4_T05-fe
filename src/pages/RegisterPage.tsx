@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import { Input } from '../../components/ui/Input';
-import { Button } from '../../components/ui/Button';
-import { registerApi } from '../../api/userApi';
+import { useAuth } from '../context/AuthContext';
+import { Input } from '../components/ui/input';
+import { Button } from '../components/ui/button';
+import { registerApi } from '../api/auth.api';
 import { Link } from 'react-router-dom';
-import { required, email, minLength, phone, lettersOnly, docNum, digitsOnly } from '../../lib/validation';
+import { required, email, minLength, phone, lettersOnly, docNum, digitsOnly } from '../lib/validation';
 
-export default function Register() {
+export default function RegisterPage() {
     const { login } = useAuth();
     const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '', phone: '', docType: 'DNI', docNum: '' });
     const [errors, setErrors] = useState<Record<string, string>>({});

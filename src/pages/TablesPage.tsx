@@ -1,16 +1,16 @@
 import { useState } from 'react';
-import { useTables } from '../../hooks/useTable';
-import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
-import { Modal } from '../../components/ui/Modal';
-import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
-import { Badge } from '../../components/ui/Badge';
-import { Table } from '../../components/ui/Table';
-import { SearchBar } from '../../components/ui/SearchBar';
-import { FilterSelect } from '../../components/ui/FilterSelect';
-import { positiveNumber, isValidJson } from '../../lib/validation';
+import { useTables } from '../hooks/useTable';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Modal } from '../components/ui/modal';
+import { ConfirmDialog } from '../components/ui/confirm-dialog';
+import { Badge } from '../components/ui/badge';
+import { DataTable } from '../components/shared/DataTable';
+import { SearchBar } from '../components/ui/search-bar';
+import { FilterSelect } from '../components/ui/filter-select';
+import { positiveNumber, isValidJson } from '../lib/validation';
 
-export default function Tables() {
+export default function TablesPage() {
     const { tables, deleted, loading, create, update, remove, restore, reload } = useTables();
     const [modal, setModal] = useState<{ open: boolean; edit?: any }>({ open: false });
     const [confirm, setConfirm] = useState<{ open: boolean; title: string; message: string; onConfirm: () => void }>({ open: false, title: '', message: '', onConfirm: () => {} });
@@ -83,7 +83,7 @@ export default function Tables() {
                 <FilterSelect label="Reservable" value={reservableFilter} onChange={setReservableFilter} options={[{ value: '', label: 'Todos' }, { value: 'si', label: 'Sí' }, { value: 'no', label: 'No' }]} />
             </div>
             <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-                <Table
+                <DataTable
                     headers={['N° Mesa', 'Capacidad', 'Ubicación', 'Estado', 'Reservable', 'Acciones']}
                     rows={filtered.map((t: any) => [
                         `Mesa ${t.tableNum}`,

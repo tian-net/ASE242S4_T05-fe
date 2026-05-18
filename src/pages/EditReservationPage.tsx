@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { fetchEventReservationByIdApi, fetchOccupiedTimesApi, updateEventReservationApi } from '../../api/eventReservationApi';
-import { fetchEventByIdApi } from '../../api/eventApi';
-import { Button } from '../../components/ui/Button';
-import { Card } from '../../components/ui/Card';
-import { futureDate, timeAfter, minDuration, positiveNumber } from '../../lib/validation';
-import { MINIMUM_HOURS } from '../../lib/constants';
+import { fetchEventReservationByIdApi, fetchOccupiedTimesApi, updateEventReservationApi } from '../api/eventReservations.api';
+import { fetchEventByIdApi } from '../api/events.api';
+import { Button } from '../components/ui/button';
+import { Card } from '../components/ui/card';
+import { futureDate, timeAfter, minDuration, positiveNumber } from '../lib/validation';
+import { MINIMUM_HOURS } from '../lib/constants';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 
-export default function EditReservation() {
+export default function EditReservationPage() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const [reservation, setReservation] = useState<any>(null);

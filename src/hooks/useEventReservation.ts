@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { EventReservation } from '../types/EventReservation';
-import { fetchEventReservationsApi, fetchDeletedEventReservationsApi, fetchMyEventReservationsApi, createEventReservationApi, updateEventReservationApi, cancelEventReservationApi, restoreEventReservationApi, fetchOccupiedTimesApi } from '../api/eventReservationApi';
+import { fetchEventReservationsApi, fetchDeletedEventReservationsApi, fetchMyEventReservationsApi, createEventReservationApi, updateEventReservationApi, cancelEventReservationApi, restoreEventReservationApi, fetchOccupiedTimesApi } from '../api/eventReservations.api';
 
 export function useEventReservations(customerId?: string) {
     const [reservations, setReservations] = useState<EventReservation[]>([]);

@@ -1,19 +1,19 @@
 import { useState, useEffect } from 'react';
-import { fetchReservationsApi, cancelReservationApi, createReservationApi, updateReservationApi } from '../../api/reservationApi';
-import { fetchCustomersApi } from '../../api/customerApi';
-import { fetchTablesApi } from '../../api/tableApi';
-import { Button } from '../../components/ui/Button';
-import { Badge } from '../../components/ui/Badge';
-import { Card } from '../../components/ui/Card';
-import { Modal } from '../../components/ui/Modal';
-import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
-import { Input } from '../../components/ui/Input';
-import { SearchBar } from '../../components/ui/SearchBar';
-import { FilterSelect } from '../../components/ui/FilterSelect';
-import { STATUS_COLORS } from '../../lib/constants';
-import { required, futureDate, positiveNumber } from '../../lib/validation';
+import { fetchReservationsApi, cancelReservationApi, createReservationApi, updateReservationApi } from '../api/reservations.api';
+import { fetchCustomersApi } from '../api/customers.api';
+import { fetchTablesApi } from '../api/tables.api';
+import { Button } from '../components/ui/button';
+import { Badge } from '../components/ui/badge';
+import { Card } from '../components/ui/card';
+import { Modal } from '../components/ui/modal';
+import { ConfirmDialog } from '../components/ui/confirm-dialog';
+import { Input } from '../components/ui/input';
+import { SearchBar } from '../components/ui/search-bar';
+import { FilterSelect } from '../components/ui/filter-select';
+import { STATUS_COLORS } from '../lib/constants';
+import { required, futureDate, positiveNumber } from '../lib/validation';
 
-export default function Reservations() {
+export default function ReservationsPage() {
     const [reservations, setReservations] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [modal, setModal] = useState<{ open: boolean; edit?: any }>({ open: false });
