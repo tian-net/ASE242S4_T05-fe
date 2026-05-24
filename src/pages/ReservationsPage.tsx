@@ -20,7 +20,7 @@ export default function ReservationsPage() {
     const [confirm, setConfirm] = useState<{ open: boolean; title: string; message: string; onConfirm: () => void }>({ open: false, title: '', message: '', onConfirm: () => {} });
     const [customers, setCustomers] = useState<any[]>([]);
     const [tables, setTables] = useState<any[]>([]);
-    const [form, setForm] = useState({ customerId: '', resDate: '', resTime: '', numPeople: 4, selectedTables: [] as string[], details: '' });
+    const [form, setForm] = useState({ customerId: '', resDate: '', resTime: '', numPeople: 4, selectedTables: [] as string[] });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
