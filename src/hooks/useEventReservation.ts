@@ -18,6 +18,9 @@ export function useEventReservations(customerId?: string) {
                 setReservations(a);
                 setDeleted(d);
             }
+        } catch {
+            setReservations([]);
+            setDeleted([]);
         } finally {
             setLoading(false);
         }

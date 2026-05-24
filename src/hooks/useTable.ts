@@ -13,6 +13,9 @@ export function useTables() {
             const [a, d] = await Promise.all([fetchTablesApi(), fetchDeletedTablesApi()]);
             setTables(a);
             setDeleted(d);
+        } catch {
+            setTables([]);
+            setDeleted([]);
         } finally {
             setLoading(false);
         }

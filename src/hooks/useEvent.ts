@@ -13,6 +13,9 @@ export function useEvents() {
             const [a, d] = await Promise.all([fetchEventsApi(), fetchDeletedEventsApi()]);
             setEvents(a);
             setDeleted(d);
+        } catch {
+            setEvents([]);
+            setDeleted([]);
         } finally {
             setLoading(false);
         }

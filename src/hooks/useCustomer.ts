@@ -13,6 +13,9 @@ export function useCustomers() {
             const [a, d] = await Promise.all([fetchCustomersApi(), fetchDeletedCustomersApi()]);
             setCustomers(a);
             setDeleted(d);
+        } catch {
+            setCustomers([]);
+            setDeleted([]);
         } finally {
             setLoading(false);
         }

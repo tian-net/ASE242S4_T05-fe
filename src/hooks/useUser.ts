@@ -13,6 +13,9 @@ export function useUsers() {
             const [a, d] = await Promise.all([fetchUsersApi(), fetchDeletedUsersApi()]);
             setUsers(a);
             setDeleted(d);
+        } catch {
+            setUsers([]);
+            setDeleted([]);
         } finally {
             setLoading(false);
         }
