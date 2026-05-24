@@ -30,6 +30,8 @@ export default function ReservationsPage() {
         try {
             const data = await fetchReservationsApi();
             setReservations(data);
+        } catch {
+            setReservations([]);
         } finally { setLoading(false); }
     };
 
@@ -48,21 +50,20 @@ export default function ReservationsPage() {
     };
 
     const openCreate = () => {
-        Promise.all([fetchCustomersApi(), fetchTablesApi()]).then(([c, t]) => { setCustomers(c); setTables(t.filter((tbl: any) => tbl.isReservable !== false)); });
-        setForm({ customerId: '', resDate: '', resTime: '', numPeople: 4, selectedTables: [], details: '' });
+        Promise.all([fetchCustomersApi(), fetchTablesApi()]).then(([c, t]) => { setCustomers(c); setTables(t.filter((tbl: any) => tbl.isReservable !== false)); }).catch(() => {});
+        setForm({ customerId: '', resDate: '', resTime: '', numPeople: 4, selectedTables: [] });
         setErrors({});
         setModal({ open: true });
     };
 
     const openEdit = (r: any) => {
-        Promise.all([fetchCustomersApi(), fetchTablesApi()]).then(([c, t]) => { setCustomers(c); setTables(t.filter((tbl: any) => tbl.isReservable !== false)); });
+        Promise.all([fetchCustomersApi(), fetchTablesApi()]).then(([c, t]) => { setCustomers(c); setTables(t.filter((tbl: any) => tbl.isReservable !== false)); }).catch(() => {});
         setForm({
             customerId: r.customerId,
             resDate: r.resDate,
             resTime: r.resTime?.substring(0, 5) || '',
             numPeople: r.numPeople,
             selectedTables: r.details?.map((d: any) => d.tableId) || [],
-            details: r.details?.map((d: any) => d.notes || '').join('; ') || '',
         });
         setErrors({});
         setModal({ open: true, edit: r });
@@ -82,6 +83,7 @@ export default function ReservationsPage() {
         const errs: Record<string, string> = {};
         errs.customerId = required(form.customerId, 'Cliente') || '';
         errs.resDate = futureDate(form.resDate, 1) || '';
+        errs.resTime = required(form.resTime, 'Hora') || '';
         errs.numPeople = positiveNumber(form.numPeople, 'Personas') || '';
         errs.selectedTables = form.selectedTables.length === 0 ? 'Selecciona al menos una mesa' : '';
         setErrors(errs);
@@ -94,7 +96,16 @@ export default function ReservationsPage() {
             numPeople: form.numPeople,
             details: form.selectedTables.map(id => ({ tableId: id, notes: '' })),
         };
-        if (modal.edit) await updateReservationApi(modal.edit.id, payload);
+        if (modal.edit) {
+            const existing = reservations.find((r: any) => r.id === modal.edit.id);
+            if (existing?.details) {
+                payload.details = form.selectedTables.map(id => {
+                    const existingDetail = existing.details.find((d: any) => d.tableId === id);
+                    return { tableId: id, notes: existingDetail?.notes || '' };
+                });
+            }
+            await updateReservationApi(modal.edit.id, payload);
+        }
         else await createReservationApi(payload);
         setModal({ open: false });
         await load();

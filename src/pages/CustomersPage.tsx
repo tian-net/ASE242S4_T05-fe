@@ -8,7 +8,7 @@ import { ConfirmDialog } from '../components/ui/confirm-dialog';
 import { DataTable } from '../components/shared/DataTable';
 import { SearchBar } from '../components/ui/search-bar';
 import { FilterSelect } from '../components/ui/filter-select';
-import { required, email, minLength, phone, lettersOnly, docNum, digitsOnly } from '../lib/validation';
+import { required, email, minLength, phone, lettersOnly, docNum } from '../lib/validation';
 
 export default function CustomersPage() {
     const { customers, deleted, loading, create, update, remove, restore, reload } = useCustomers();
@@ -28,7 +28,7 @@ export default function CustomersPage() {
             case 'lastName': newErrors.lastName = required(value, 'Apellido') || minLength(3)(value, 'Apellido') || lettersOnly(value, 'Apellido') || ''; break;
             case 'email': newErrors.email = email(value) || ''; break;
             case 'phone': newErrors.phone = phone(value) || ''; break;
-            case 'docNum': newErrors.docNum = docNum(form.docType, value) || digitsOnly(value, 'N° Documento') || ''; break;
+            case 'docNum': newErrors.docNum = docNum(form.docType, value) || ''; break;
         }
         setErrors(newErrors);
     };
@@ -51,7 +51,7 @@ export default function CustomersPage() {
         errs.lastName = required(form.lastName, 'Apellido') || minLength(3)(form.lastName, 'Apellido') || lettersOnly(form.lastName, 'Apellido') || '';
         errs.email = email(form.email) || '';
         errs.phone = phone(form.phone) || '';
-        errs.docNum = docNum(form.docType, form.docNum) || digitsOnly(form.docNum, 'N° Documento') || '';
+        errs.docNum = docNum(form.docType, form.docNum) || '';
         setErrors(errs);
         if (Object.values(errs).some(Boolean)) return;
         if (modal.edit) await update(modal.edit.id, form);

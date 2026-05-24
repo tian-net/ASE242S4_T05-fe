@@ -110,11 +110,23 @@ export default function EditReservationPage() {
         setLoading(true);
         try {
             const dateStr = date!.toISOString().split('T')[0];
+            const [sh, sm] = startTime.split(':').map(Number);
+            const [eh, em] = endTime.split(':').map(Number);
+            const hours = (eh + em / 60) - (sh + sm / 60);
+            const isFullDay = event?.pricePerDay && hours >= 8;
             await updateEventReservationApi(id, {
+                customerId: reservation.customerId,
+                eventId: reservation.eventId,
                 eventDate: dateStr,
                 startTime: startTime + ':00',
                 endTime: endTime + ':00',
+                reservationType: isFullDay ? 'dia' : 'hora',
+                quantityHours: Math.ceil(hours),
                 totalPeople,
+                totalAmount: isFullDay ? (event?.pricePerDay || 0) : (event?.pricePerHour || 0) * Math.ceil(hours),
+                pricePerHour: event?.pricePerHour || 0,
+                pricePerDay: event?.pricePerDay || 0,
+                venueCapacity: event?.maxCapacity || 0,
                 notes,
             });
             navigate('/cliente/my-reservations', { replace: true });

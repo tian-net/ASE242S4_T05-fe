@@ -16,11 +16,13 @@ export default function MyReservationsPage() {
     const [confirm, setConfirm] = useState<{ open: boolean; title: string; message: string; onConfirm: () => void }>({ open: false, title: '', message: '', onConfirm: () => {} });
 
     const load = async () => {
-        if (!user?.customer?.id) return;
+        if (!user?.customer?.id) { setLoading(false); return; }
         setLoading(true);
         try {
             const data = await fetchMyEventReservationsApi(user.customer.id);
             setReservations(data);
+        } catch {
+            setReservations([]);
         } finally { setLoading(false); }
     };
 
@@ -53,7 +55,7 @@ export default function MyReservationsPage() {
                         </div>
                         <div className="space-y-2 text-sm text-gray-600">
                             <p><span className="font-medium">Fecha:</span> {r.eventDate}</p>
-                            <p><span className="font-medium">Hora:</span> {r.startTime} - {r.endTime}</p>
+                            <p><span className="font-medium">Hora:</span> {r.startTime?.substring(0, 5)} - {r.endTime?.substring(0, 5)}</p>
                             <p><span className="font-medium">Personas:</span> {r.totalPeople}</p>
                             <p><span className="font-medium">Monto:</span> S/ {r.totalAmount?.toFixed(2)}</p>
                             {r.notes && <p><span className="font-medium">Notas:</span> {r.notes}</p>}

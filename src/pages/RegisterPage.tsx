@@ -4,7 +4,7 @@ import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { registerApi } from '../api/auth.api';
 import { Link } from 'react-router-dom';
-import { required, email, minLength, phone, lettersOnly, docNum, digitsOnly } from '../lib/validation';
+import { required, email, minLength, phone, lettersOnly, docNum } from '../lib/validation';
 
 export default function RegisterPage() {
     const { login } = useAuth();
@@ -21,7 +21,7 @@ export default function RegisterPage() {
             case 'email': newErrors.email = email(value) || ''; break;
             case 'password': newErrors.password = minLength(6)(value, 'Contraseña') || ''; break;
             case 'phone': newErrors.phone = phone(value) || ''; break;
-            case 'docNum': newErrors.docNum = docNum(form.docType, value) || digitsOnly(value, 'N° Documento') || ''; break;
+            case 'docNum': newErrors.docNum = docNum(form.docType, value) || ''; break;
         }
         setErrors(newErrors);
     };
@@ -41,7 +41,7 @@ export default function RegisterPage() {
         errs.email = email(form.email) || '';
         errs.password = minLength(6)(form.password, 'Contraseña') || '';
         errs.phone = phone(form.phone) || '';
-        errs.docNum = docNum(form.docType, form.docNum) || digitsOnly(form.docNum, 'N° Documento') || '';
+        errs.docNum = docNum(form.docType, form.docNum) || '';
         setErrors(errs);
         if (Object.values(errs).some(Boolean)) return;
         setError('');

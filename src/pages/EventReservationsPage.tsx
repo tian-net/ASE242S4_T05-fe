@@ -38,6 +38,9 @@ export default function EventReservationsPage() {
             const [a, d] = await Promise.all([fetchEventReservationsApi(), fetchDeletedEventReservationsApi()]);
             setReservations(a);
             setDeleted(d);
+        } catch {
+            setReservations([]);
+            setDeleted([]);
         } finally { setLoading(false); }
     };
 
@@ -74,14 +77,14 @@ export default function EventReservationsPage() {
     };
 
     const openCreate = () => {
-        Promise.all([fetchCustomersApi(), fetchActiveEnabledEventsApi()]).then(([c, e]) => { setCustomers(c); setEvents(e); });
+        Promise.all([fetchCustomersApi(), fetchActiveEnabledEventsApi()]).then(([c, e]) => { setCustomers(c); setEvents(e); }).catch(() => {});
         setForm({ customerId: '', eventId: '', eventDate: '', startTime: '', endTime: '', totalPeople: 20, notes: '' });
         setErrors({});
         setModal({ open: true });
     };
 
     const openEdit = (r: any) => {
-        Promise.all([fetchCustomersApi(), fetchActiveEnabledEventsApi()]).then(([c, e]) => { setCustomers(c); setEvents(e); });
+        Promise.all([fetchCustomersApi(), fetchActiveEnabledEventsApi()]).then(([c, e]) => { setCustomers(c); setEvents(e); }).catch(() => {});
         setForm({ customerId: r.customerId, eventId: r.eventId, eventDate: r.eventDate, startTime: r.startTime?.substring(0, 5) || '', endTime: r.endTime?.substring(0, 5) || '', totalPeople: r.totalPeople, notes: r.notes || '' });
         setErrors({});
         setModal({ open: true, edit: r });
@@ -97,6 +100,8 @@ export default function EventReservationsPage() {
         if (form.startTime && form.endTime) {
             const t = timeAfter(form.startTime, form.endTime);
             if (t) errs.endTime = t;
+            const d = minDuration(form.startTime, form.endTime, minHrs, selectedEvent?.name || 'evento');
+            if (d) errs.endTime = d;
         }
         setErrors(errs);
         if (Object.values(errs).some(Boolean)) return;
