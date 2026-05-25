@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useTables } from '../hooks/useTable';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Modal } from '../components/ui/modal';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { Modal } from '../components/ui/Modal';
 import { ConfirmDialog } from '../components/ui/confirm-dialog';
-import { Badge } from '../components/ui/badge';
+import { Badge } from '../components/ui/Badge';
 import { DataTable } from '../components/shared/DataTable';
 import { SearchBar } from '../components/ui/search-bar';
 import { FilterSelect } from '../components/ui/filter-select';

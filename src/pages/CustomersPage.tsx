@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useCustomers } from '../hooks/useCustomer';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Modal } from '../components/ui/modal';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { Modal } from '../components/ui/Modal';
 import { ConfirmDialog } from '../components/ui/confirm-dialog';
 
 import { DataTable } from '../components/shared/DataTable';

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Input } from '../components/ui/input';
-import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/Input';
+import { Button } from '../components/ui/Button';
 import { registerApi } from '../api/auth.api';
 import { Link } from 'react-router-dom';
 import { required, email, minLength, phone, lettersOnly, docNum } from '../lib/validation';

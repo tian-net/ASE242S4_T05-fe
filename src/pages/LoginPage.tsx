@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Input } from '../components/ui/input';
-import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/Input';
+import { Button } from '../components/ui/Button';
 import { Link } from 'react-router-dom';
 
 export default function LoginPage() {

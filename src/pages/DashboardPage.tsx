@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card } from '../components/ui/card';
+import { Card } from '../components/ui/Card';
 import { fetchEventReservationsApi } from '../api/eventReservations.api';
 import { fetchReservationsApi } from '../api/reservations.api';
 import { fetchCustomersApi } from '../api/customers.api';
@@ -10,24 +10,26 @@ export default function DashboardPage() {
 
     useEffect(() => {
         const load = async () => {
-            try {
-                const [eventRes, tableRes, customers, events] = await Promise.all([
-                    fetchEventReservationsApi(),
-                    fetchReservationsApi(),
-                    fetchCustomersApi(),
-                    fetchEventsApi(),
-                ]);
-                const today = new Date().toISOString().split('T')[0];
-                const todayEvent = eventRes.filter((r: any) => r.eventDate === today && !r.isDeleted);
-                const todayTable = tableRes.filter((r: any) => r.resDate === today && !r.isDeleted);
-                const revenue = eventRes.filter((r: any) => !r.isDeleted).reduce((sum: number, r: any) => sum + (r.totalAmount || 0), 0);
-                setStats({
-                    reservationsToday: todayEvent.length + todayTable.length,
-                    totalCustomers: customers.length,
-                    activeEvents: events.filter((e: any) => e.isActive).length,
-                    totalRevenue: revenue,
-                });
-            } catch { /* ignore */ }
+            const [eventResult, tableResult, customersResult, eventsResult] = await Promise.allSettled([
+                fetchEventReservationsApi(),
+                fetchReservationsApi(),
+                fetchCustomersApi(),
+                fetchEventsApi(),
+            ]);
+            const eventRes = eventResult.status === 'fulfilled' ? eventResult.value : [];
+            const tableRes = tableResult.status === 'fulfilled' ? tableResult.value : [];
+            const customers = customersResult.status === 'fulfilled' ? customersResult.value : [];
+            const events = eventsResult.status === 'fulfilled' ? eventsResult.value : [];
+            const today = new Date().toISOString().split('T')[0];
+            const todayEvent = eventRes.filter((r: any) => r.eventDate === today && !r.isDeleted);
+            const todayTable = tableRes.filter((r: any) => r.resDate === today && !r.isDeleted);
+            const revenue = eventRes.filter((r: any) => !r.isDeleted).reduce((sum: number, r: any) => sum + (r.totalAmount || 0), 0);
+            setStats({
+                reservationsToday: todayEvent.length + todayTable.length,
+                totalCustomers: customers.length,
+                activeEvents: events.filter((e: any) => e.isActive).length,
+                totalRevenue: revenue,
+            });
         };
         load();
     }, []);
