@@ -19,7 +19,6 @@ export default function UsersPage() {
     const [showDeleted, setShowDeleted] = useState(false);
     const [search, setSearch] = useState('');
     const [roleFilter, setRoleFilter] = useState('');
-    const [statusFilter, setStatusFilter] = useState('');
     const list = showDeleted ? deleted : users;
 
     const validate = (field: string, value: any) => {
@@ -65,8 +64,7 @@ export default function UsersPage() {
         const s = search.toLowerCase();
         const matchSearch = !s || u.fullName?.toLowerCase().includes(s) || u.email?.toLowerCase().includes(s);
         const matchRole = !roleFilter || u.role === roleFilter;
-        const matchStatus = !statusFilter || (statusFilter === 'activo' ? u.isActive : !u.isActive);
-        return matchSearch && matchRole && matchStatus;
+        return matchSearch && matchRole;
     });
 
     if (loading) return <div className="text-center py-8 text-gray-400">Cargando...</div>;
@@ -83,16 +81,14 @@ export default function UsersPage() {
             <div className="flex flex-wrap items-center gap-3 mb-4">
                 <SearchBar value={search} onChange={setSearch} placeholder="Buscar nombre o email..." />
                 <FilterSelect label="Rol" value={roleFilter} onChange={setRoleFilter} options={[{ value: '', label: 'Todos' }, { value: 'admin', label: 'Admin' }, { value: 'cliente', label: 'Cliente' }]} />
-                <FilterSelect label="Estado" value={statusFilter} onChange={setStatusFilter} options={[{ value: '', label: 'Todos' }, { value: 'activo', label: 'Activo' }, { value: 'inactivo', label: 'Inactivo' }]} />
             </div>
             <div className="bg-white rounded-xl shadow-sm border border-gray-200">
                 <DataTable
-                    headers={['Nombre', 'Email', 'Rol', 'Estado', 'Acciones']}
+                    headers={['Nombre', 'Email', 'Rol', 'Acciones']}
                     rows={filtered.map((u: any) => [
                         u.fullName,
                         u.email,
                         <Badge className={u.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}>{u.role}</Badge>,
-                        <Badge className={showDeleted ? 'bg-red-100 text-red-800' : (u.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800')}>{showDeleted ? 'Eliminado' : (u.isActive ? 'Activo' : 'Inactivo')}</Badge>,
                         <div className="flex gap-2">
                             {!showDeleted ? (
                                 <>

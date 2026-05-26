@@ -5,6 +5,5 @@ export interface User {
     password?: string;
     role: 'admin' | 'cliente';
     customerId?: string;
-    isActive: boolean;
     isDeleted?: boolean;
 }
