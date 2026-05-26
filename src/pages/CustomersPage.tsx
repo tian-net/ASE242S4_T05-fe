@@ -16,6 +16,7 @@ export default function CustomersPage() {
     const [confirm, setConfirm] = useState<{ open: boolean; title: string; message: string; onConfirm: () => void }>({ open: false, title: '', message: '', onConfirm: () => {} });
     const [form, setForm] = useState({ firstName: '', lastName: '', email: '', phone: '', docType: 'DNI' as 'DNI' | 'RUC' | 'CarnetExtranjeria' | 'Pasaporte', docNum: '', isFrequent: false });
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const [serverError, setServerError] = useState('');
     const [showDeleted, setShowDeleted] = useState(false);
     const [search, setSearch] = useState('');
     const [docFilter, setDocFilter] = useState('');
@@ -36,12 +37,14 @@ export default function CustomersPage() {
     const openCreate = () => {
         setForm({ firstName: '', lastName: '', email: '', phone: '', docType: 'DNI' as const, docNum: '', isFrequent: false });
         setErrors({});
+        setServerError('');
         setModal({ open: true });
     };
 
     const openEdit = (c: any) => {
         setForm({ firstName: c.firstName, lastName: c.lastName, email: c.email || '', phone: c.phone, docType: c.docType, docNum: c.docNum, isFrequent: c.isFrequent ?? false });
         setErrors({});
+        setServerError('');
         setModal({ open: true, edit: c });
     };
 
@@ -54,9 +57,14 @@ export default function CustomersPage() {
         errs.docNum = docNum(form.docType, form.docNum) || '';
         setErrors(errs);
         if (Object.values(errs).some(Boolean)) return;
-        if (modal.edit) await update(modal.edit.id, form);
-        else await create(form);
-        setModal({ open: false });
+        try {
+            if (modal.edit) await update(modal.edit.id, form);
+            else await create(form);
+            setModal({ open: false });
+        } catch (err: any) {
+            const msg = err?.response?.data?.message;
+            setServerError(msg || 'Error al guardar el cliente');
+        }
     };
 
     const hasErrors = Object.values(errors).some(Boolean) || !form.firstName || !form.lastName || !form.phone || !form.docNum;
@@ -107,6 +115,7 @@ export default function CustomersPage() {
 
             <Modal open={modal.open} onClose={() => setModal({ open: false })} title={modal.edit ? 'Editar Cliente' : 'Nuevo Cliente'}>
                 <div className="space-y-4">
+                    {serverError && <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">{serverError}</div>}
                     <div className="grid grid-cols-2 gap-3">
                         <Input label="Nombre" value={form.firstName} onChange={e => { setForm(f => ({ ...f, firstName: e.target.value })); validate('firstName', e.target.value); }} error={errors.firstName} />
                         <Input label="Apellido" value={form.lastName} onChange={e => { setForm(f => ({ ...f, lastName: e.target.value })); validate('lastName', e.target.value); }} error={errors.lastName} />
