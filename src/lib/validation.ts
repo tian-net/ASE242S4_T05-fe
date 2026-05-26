@@ -93,3 +93,12 @@ export const minDuration = (start: string, end: string, minHours: number, eventN
     if (hours < minHours) return `Duración mínima para ${eventName} es ${minHours} hora(s)`;
     return null;
 };
+
+export const maxDuration = (start: string, end: string, maxHours: number): string | null => {
+    if (!start || !end) return null;
+    const [sh, sm] = start.split(':').map(Number);
+    const [eh, em] = end.split(':').map(Number);
+    const hours = (eh + em / 60) - (sh + sm / 60);
+    if (hours > maxHours) return `La duración máxima es ${maxHours} horas. Para duraciones mayores, contacte al administrador.`;
+    return null;
+};

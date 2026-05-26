@@ -11,7 +11,7 @@ import { Input } from '../components/ui/Input';
 import { SearchBar } from '../components/ui/search-bar';
 import { FilterSelect } from '../components/ui/filter-select';
 import { STATUS_COLORS, MINIMUM_HOURS } from '../lib/constants';
-import { required, futureDate, maxDate, timeAfter, minDuration, positiveNumber } from '../lib/validation';
+import { required, futureDate, maxDate, timeAfter, minDuration, maxDuration, positiveNumber } from '../lib/validation';
 
 const STATUSES = ['Planificado', 'pendiente', 'Confirmado', 'Cancelado', 'En curso', 'Finalizado'];
 
@@ -26,6 +26,7 @@ export default function EventReservationsPage() {
     const [events, setEvents] = useState<any[]>([]);
     const [form, setForm] = useState({ customerId: '', eventId: '', eventDate: '', startTime: '', endTime: '', totalPeople: 20, notes: '' });
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const [serverError, setServerError] = useState('');
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
     const [dateFrom, setDateFrom] = useState('');
@@ -66,6 +67,10 @@ export default function EventReservationsPage() {
                     if (t) newErrors.endTime = t;
                     const d = minDuration(form.startTime, form.endTime, minHrs, selectedEvent?.name || 'evento');
                     if (d) newErrors.endTime = d;
+                    if (!d) {
+                        const x = maxDuration(form.startTime, form.endTime, 8);
+                        if (x) newErrors.endTime = x;
+                    }
                 }
                 break;
             case 'totalPeople':
@@ -80,6 +85,7 @@ export default function EventReservationsPage() {
         Promise.all([fetchCustomersApi(), fetchActiveEnabledEventsApi()]).then(([c, e]) => { setCustomers(c); setEvents(e); }).catch(() => {});
         setForm({ customerId: '', eventId: '', eventDate: '', startTime: '', endTime: '', totalPeople: 20, notes: '' });
         setErrors({});
+        setServerError('');
         setModal({ open: true });
     };
 
@@ -87,6 +93,7 @@ export default function EventReservationsPage() {
         Promise.all([fetchCustomersApi(), fetchActiveEnabledEventsApi()]).then(([c, e]) => { setCustomers(c); setEvents(e); }).catch(() => {});
         setForm({ customerId: r.customerId, eventId: r.eventId, eventDate: r.eventDate, startTime: r.startTime?.substring(0, 5) || '', endTime: r.endTime?.substring(0, 5) || '', totalPeople: r.totalPeople, notes: r.notes || '' });
         setErrors({});
+        setServerError('');
         setModal({ open: true, edit: r });
     };
 
@@ -102,6 +109,10 @@ export default function EventReservationsPage() {
             if (t) errs.endTime = t;
             const d = minDuration(form.startTime, form.endTime, minHrs, selectedEvent?.name || 'evento');
             if (d) errs.endTime = d;
+            if (!d) {
+                const x = maxDuration(form.startTime, form.endTime, 8);
+                if (x) errs.endTime = x;
+            }
         }
         setErrors(errs);
         if (Object.values(errs).some(Boolean)) return;
@@ -122,10 +133,15 @@ export default function EventReservationsPage() {
             totalPeople: form.totalPeople,
             notes: form.notes,
         };
-        if (modal.edit) await updateEventReservationApi(modal.edit.id, payload);
-        else await createEventReservationApi(payload);
-        setModal({ open: false });
-        await load();
+        try {
+            if (modal.edit) await updateEventReservationApi(modal.edit.id, payload);
+            else await createEventReservationApi(payload);
+            setModal({ open: false });
+            await load();
+        } catch (err: any) {
+            const msg = err?.response?.data?.message;
+            setServerError(msg || 'Error al guardar la reserva');
+        }
     };
 
     const handleCancel = async (id: string) => { await cancelEventReservationApi(id); await load(); };
@@ -191,6 +207,7 @@ export default function EventReservationsPage() {
 
             <Modal open={modal.open} onClose={() => setModal({ open: false })} title={modal.edit ? 'Editar Reserva de Evento' : 'Nueva Reserva de Evento'}>
                 <div className="space-y-4">
+                    {serverError && <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">{serverError}</div>}
                     <div className="flex flex-col gap-1">
                         <label className="text-sm font-medium text-gray-700">Cliente</label>
                         <select value={form.customerId} onChange={e => { setForm(f => ({ ...f, customerId: e.target.value })); validate('customerId', e.target.value); }} className="border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 border-gray-300">
