@@ -14,7 +14,7 @@ export default function UsersPage() {
     const { users, deleted, loading, create, update, remove, restore, reload } = useUsers();
     const [modal, setModal] = useState<{ open: boolean; edit?: any }>({ open: false });
     const [confirm, setConfirm] = useState<{ open: boolean; title: string; message: string; onConfirm: () => void }>({ open: false, title: '', message: '', onConfirm: () => {} });
-    const [form, setForm] = useState<{ fullName: string; email: string; password: string; role: 'admin' | 'cliente'; isActive: boolean }>({ fullName: '', email: '', password: '', role: 'admin', isActive: true });
+    const [form, setForm] = useState<{ fullName: string; email: string; password: string; role: 'admin' | 'cliente' }>({ fullName: '', email: '', password: '', role: 'admin' });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [showDeleted, setShowDeleted] = useState(false);
     const [search, setSearch] = useState('');
@@ -36,13 +36,13 @@ export default function UsersPage() {
     };
 
     const openCreate = () => {
-        setForm({ fullName: '', email: '', password: '', role: 'admin', isActive: true });
+        setForm({ fullName: '', email: '', password: '', role: 'admin' });
         setErrors({});
         setModal({ open: true });
     };
 
     const openEdit = (u: any) => {
-        setForm({ fullName: u.fullName, email: u.email, password: '', role: u.role, isActive: u.isActive });
+        setForm({ fullName: u.fullName, email: u.email, password: '', role: u.role });
         setErrors({});
         setModal({ open: true, edit: u });
     };
@@ -92,7 +92,7 @@ export default function UsersPage() {
                         u.fullName,
                         u.email,
                         <Badge className={u.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}>{u.role}</Badge>,
-                        <Badge className={u.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>{u.isActive ? 'Activo' : 'Inactivo'}</Badge>,
+                        <Badge className={showDeleted ? 'bg-red-100 text-red-800' : (u.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800')}>{showDeleted ? 'Eliminado' : (u.isActive ? 'Activo' : 'Inactivo')}</Badge>,
                         <div className="flex gap-2">
                             {!showDeleted ? (
                                 <>
@@ -118,10 +118,6 @@ export default function UsersPage() {
                             <option value="admin">Admin</option>
                             <option value="cliente">Cliente</option>
                         </select>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <input type="checkbox" checked={form.isActive} onChange={e => setForm(f => ({ ...f, isActive: e.target.checked }))} className="rounded" />
-                        <label className="text-sm text-gray-700">Activo</label>
                     </div>
                     <div className="flex justify-end gap-2 pt-2">
                         <Button variant="secondary" onClick={() => setModal({ open: false })}>Cancelar</Button>

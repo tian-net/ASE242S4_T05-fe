@@ -17,7 +17,7 @@ export const fetchUserByIdApi = async (id: string): Promise<User> => {
 };
 
 export const createUserApi = async (user: Partial<User>): Promise<User> => {
-    const { data } = await api.post<User>('/users', user);
+    const { data } = await api.post<User>('/users/create', user);
     return data;
 };
 
