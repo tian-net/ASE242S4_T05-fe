@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { fetchEventReservationsApi, fetchDeletedEventReservationsApi, cancelEventReservationApi, restoreEventReservationApi, createEventReservationApi, updateEventReservationApi } from '../api/eventReservations.api';
+import { checkEventAvailabilityApi, fetchEventReservationsApi, fetchDeletedEventReservationsApi, cancelEventReservationApi, restoreEventReservationApi, createEventReservationApi, updateEventReservationApi } from '../api/eventReservations.api';
 import { fetchCustomersApi } from '../api/customers.api';
 import { fetchActiveEnabledEventsApi } from '../api/events.api';
 import { Button } from '../components/ui/Button';
@@ -10,10 +10,23 @@ import { ConfirmDialog } from '../components/ui/confirm-dialog';
 import { Input } from '../components/ui/Input';
 import { SearchBar } from '../components/ui/search-bar';
 import { FilterSelect } from '../components/ui/filter-select';
-import { STATUS_COLORS, MINIMUM_HOURS } from '../lib/constants';
-import { required, futureDate, maxDate, timeAfter, minDuration, maxDuration, positiveNumber } from '../lib/validation';
+import { STATUS_COLORS } from '../lib/constants';
+import { required, positiveNumber } from '../lib/validation';
 
 const STATUSES = ['Planificado', 'pendiente', 'Confirmado', 'Cancelado', 'En curso', 'Finalizado'];
+
+interface DetailForm {
+    id: number;
+    eventId: string;
+    eventDate: string;
+    startTime: string;
+    endTime: string;
+    reservationType: string;
+    quantityHours: number;
+    totalPeople: number;
+    notes: string;
+    conflictMsg: string;
+}
 
 export default function EventReservationsPage() {
     const [reservations, setReservations] = useState<any[]>([]);
@@ -24,7 +37,9 @@ export default function EventReservationsPage() {
     const [confirm, setConfirm] = useState<{ open: boolean; title: string; message: string; onConfirm: () => void }>({ open: false, title: '', message: '', onConfirm: () => {} });
     const [customers, setCustomers] = useState<any[]>([]);
     const [events, setEvents] = useState<any[]>([]);
-    const [form, setForm] = useState({ customerId: '', eventId: '', eventDate: '', startTime: '', endTime: '', totalPeople: 20, notes: '' });
+    const [form, setForm] = useState({ customerId: '', status: '' });
+    const [details, setDetails] = useState<DetailForm[]>([]);
+    const [nextDetailId, setNextDetailId] = useState(0);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [serverError, setServerError] = useState('');
     const [search, setSearch] = useState('');
@@ -47,43 +62,64 @@ export default function EventReservationsPage() {
 
     useEffect(() => { load(); }, []);
 
-    const selectedEvent = events.find(e => e.id === form.eventId);
-    const minHrs = selectedEvent ? (MINIMUM_HOURS[selectedEvent.eventType] || 1) : 1;
+    const addDetail = () => {
+        setDetails([...details, { id: nextDetailId, eventId: '', eventDate: '', startTime: '', endTime: '', reservationType: 'hora', quantityHours: 0, totalPeople: 20, notes: '', conflictMsg: '' }]);
+        setNextDetailId(nextDetailId + 1);
+    };
+
+    const removeDetail = (id: number) => setDetails(details.filter(d => d.id !== id));
+
+    let conflictTimer: ReturnType<typeof setTimeout>;
+    const checkConflict = async (d: DetailForm) => {
+        if (!d.eventDate || !d.startTime || !d.endTime) return;
+        try {
+            const res = await checkEventAvailabilityApi({
+                eventDate: d.eventDate,
+                startTime: d.startTime + ':00',
+                endTime: d.endTime + ':00',
+                reservationType: d.reservationType,
+                excludeId: modal.edit?.id,
+            });
+            setDetails(prev => prev.map(pd => pd.id === d.id ? { ...pd, conflictMsg: res.available ? '' : (res.conflicts[0]?.message || 'Conflicto de horario') } : pd));
+        } catch {
+            setDetails(prev => prev.map(pd => pd.id === d.id ? { ...pd, conflictMsg: '' } : pd));
+        }
+    };
+
+    const updateDetail = (id: number, field: string, value: any) => {
+        setDetails(details.map(d => {
+            if (d.id !== id) return d;
+            const updated = { ...d, [field]: value };
+            if (field === 'startTime' || field === 'endTime') {
+                if (updated.startTime && updated.endTime) {
+                    const [sh, sm] = updated.startTime.split(':').map(Number);
+                    const [eh, em] = updated.endTime.split(':').map(Number);
+                    const hours = (eh + em / 60) - (sh + sm / 60);
+                    updated.quantityHours = Math.ceil(hours);
+                    if (hours >= 8) updated.reservationType = 'dia';
+                    else updated.reservationType = 'hora';
+                }
+            }
+            if (field === 'eventDate' || field === 'startTime' || field === 'endTime') {
+                clearTimeout(conflictTimer);
+                conflictTimer = setTimeout(() => checkConflict(updated), 500);
+            }
+            return updated;
+        }));
+    };
 
     const validate = (field: string, value: any) => {
         const newErrors = { ...errors };
         switch (field) {
             case 'customerId': newErrors.customerId = required(value, 'Cliente') || ''; break;
-            case 'eventId': newErrors.eventId = required(value, 'Evento') || ''; break;
-            case 'eventDate':
-                newErrors.eventDate = futureDate(value, 1) || maxDate(value, 90) || '';
-                break;
-            case 'startTime':
-            case 'endTime':
-                newErrors.startTime = '';
-                newErrors.endTime = '';
-                if (form.startTime && form.endTime) {
-                    const t = timeAfter(form.startTime, form.endTime);
-                    if (t) newErrors.endTime = t;
-                    const d = minDuration(form.startTime, form.endTime, minHrs, selectedEvent?.name || 'evento');
-                    if (d) newErrors.endTime = d;
-                    if (!d) {
-                        const x = maxDuration(form.startTime, form.endTime, 8);
-                        if (x) newErrors.endTime = x;
-                    }
-                }
-                break;
-            case 'totalPeople':
-                newErrors.totalPeople = positiveNumber(value, 'Personas') || '';
-                if (value > (selectedEvent?.maxCapacity || 999)) newErrors.totalPeople = `Máximo ${selectedEvent?.maxCapacity} personas`;
-                break;
         }
         setErrors(newErrors);
     };
 
     const openCreate = () => {
         Promise.all([fetchCustomersApi(), fetchActiveEnabledEventsApi()]).then(([c, e]) => { setCustomers(c); setEvents(e); }).catch(() => {});
-        setForm({ customerId: '', eventId: '', eventDate: '', startTime: '', endTime: '', totalPeople: 20, notes: '' });
+        setForm({ customerId: '', status: '' });
+        setDetails([]);
         setErrors({});
         setServerError('');
         setModal({ open: true });
@@ -91,7 +127,20 @@ export default function EventReservationsPage() {
 
     const openEdit = (r: any) => {
         Promise.all([fetchCustomersApi(), fetchActiveEnabledEventsApi()]).then(([c, e]) => { setCustomers(c); setEvents(e); }).catch(() => {});
-        setForm({ customerId: r.customerId, eventId: r.eventId, eventDate: r.eventDate, startTime: r.startTime?.substring(0, 5) || '', endTime: r.endTime?.substring(0, 5) || '', totalPeople: r.totalPeople, notes: r.notes || '' });
+        setForm({ customerId: r.customerId, status: r.status || '' });
+        setDetails((r.details || []).map((d: any, i: number) => ({
+            id: i,
+            eventId: d.eventId,
+            eventDate: d.eventDate,
+            startTime: d.startTime?.substring(0, 5) || '',
+            endTime: d.endTime?.substring(0, 5) || '',
+            reservationType: d.reservationType || 'hora',
+            quantityHours: d.quantityHours || 0,
+            totalPeople: d.totalPeople || 1,
+            notes: d.notes || '',
+            conflictMsg: '',
+        })));
+        setNextDetailId((r.details || []).length);
         setErrors({});
         setServerError('');
         setModal({ open: true, edit: r });
@@ -100,63 +149,54 @@ export default function EventReservationsPage() {
     const handleSave = async () => {
         const errs: Record<string, string> = {};
         errs.customerId = required(form.customerId, 'Cliente') || '';
-        errs.eventId = required(form.eventId, 'Evento') || '';
-        errs.eventDate = futureDate(form.eventDate, 1) || maxDate(form.eventDate, 90) || '';
-        errs.totalPeople = positiveNumber(form.totalPeople, 'Personas') || '';
-        if (form.totalPeople > (selectedEvent?.maxCapacity || 999)) errs.totalPeople = `Máximo ${selectedEvent?.maxCapacity} personas`;
-        if (form.startTime && form.endTime) {
-            const t = timeAfter(form.startTime, form.endTime);
-            if (t) errs.endTime = t;
-            const d = minDuration(form.startTime, form.endTime, minHrs, selectedEvent?.name || 'evento');
-            if (d) errs.endTime = d;
-            if (!d) {
-                const x = maxDuration(form.startTime, form.endTime, 8);
-                if (x) errs.endTime = x;
-            }
-        }
         setErrors(errs);
         if (Object.values(errs).some(Boolean)) return;
-
-        const [sh, sm] = form.startTime.split(':').map(Number);
-        const [eh, em] = form.endTime.split(':').map(Number);
-        const hours = (eh + em / 60) - (sh + sm / 60);
-        const isFullDay = selectedEvent?.pricePerDay && hours >= 8;
+        if (details.length === 0) { setServerError('Debe agregar al menos un evento'); return; }
+        if (details.some(d => d.conflictMsg)) { setServerError('Resuelva los conflictos de horario antes de guardar'); return; }
 
         const payload: any = {
             customerId: form.customerId,
-            eventId: form.eventId,
-            eventDate: form.eventDate,
-            startTime: form.startTime + ':00',
-            endTime: form.endTime + ':00',
-            reservationType: isFullDay ? 'dia' : 'hora',
-            quantityHours: Math.ceil(hours),
-            totalPeople: form.totalPeople,
-            notes: form.notes,
+            details: details.map(d => ({
+                eventId: d.eventId,
+                eventDate: d.eventDate,
+                startTime: d.startTime ? d.startTime + ':00' : null,
+                endTime: d.endTime ? d.endTime + ':00' : null,
+                reservationType: d.reservationType,
+                quantityHours: d.quantityHours,
+                totalPeople: d.totalPeople,
+                notes: d.notes,
+            })),
         };
+        if (modal.edit) {
+            payload.status = form.status;
+        }
         try {
             if (modal.edit) await updateEventReservationApi(modal.edit.id, payload);
             else await createEventReservationApi(payload);
             setModal({ open: false });
             await load();
         } catch (err: any) {
-            const msg = err?.response?.data?.message;
-            setServerError(msg || 'Error al guardar la reserva');
+            setServerError(err?.response?.data?.message || 'Error al guardar la reserva');
         }
     };
 
     const handleCancel = async (id: string) => { await cancelEventReservationApi(id); await load(); };
     const handleRestore = async (id: string) => { await restoreEventReservationApi(id); await load(); };
 
-    const hasErrors = Object.values(errors).some(Boolean) || !form.customerId || !form.eventId || !form.eventDate || !form.startTime || !form.endTime;
+    const hasErrors = Object.values(errors).some(Boolean) || !form.customerId || details.length === 0 || details.some(d => !d.eventId || !d.eventDate || d.conflictMsg);
 
     const filtered = list.filter((r: any) => {
         const s = search.toLowerCase();
-        const matchSearch = !s || r.eventName?.toLowerCase().includes(s) || r.notes?.toLowerCase().includes(s);
+        const eventNames = (r.details || []).map((d: any) => (d.eventName || '').toLowerCase()).join(' ');
+        const matchSearch = !s || eventNames.includes(s);
         const matchStatus = !statusFilter || r.status === statusFilter;
-        const matchFrom = !dateFrom || r.eventDate >= dateFrom;
-        const matchTo = !dateTo || r.eventDate <= dateTo;
-        return matchSearch && matchStatus && matchFrom && matchTo;
+        return matchSearch && matchStatus;
     });
+
+    const getEventLabel = (eventId: string) => {
+        const ev = events.find(e => e.id === eventId);
+        return ev ? ev.name : eventId;
+    };
 
     if (loading) return <div className="text-center py-8 text-gray-400">Cargando...</div>;
 
@@ -170,10 +210,8 @@ export default function EventReservationsPage() {
                 </div>
             </div>
             <div className="flex flex-wrap items-center gap-3 mb-4">
-                <SearchBar value={search} onChange={setSearch} placeholder="Buscar evento o notas..." />
+                <SearchBar value={search} onChange={setSearch} placeholder="Buscar evento..." />
                 <FilterSelect label="Estado" value={statusFilter} onChange={setStatusFilter} options={[{ value: '', label: 'Todos' }, ...STATUSES.map(s => ({ value: s, label: s }))]} />
-                <Input label="Desde" type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} className="w-36" />
-                <Input label="Hasta" type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} className="w-36" />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -181,14 +219,18 @@ export default function EventReservationsPage() {
                     <Card key={r.id} className="relative">
                         <div className="flex items-center justify-between mb-3">
                             <Badge className={STATUS_COLORS[r.status] || 'bg-gray-100 text-gray-800'}>{r.status}</Badge>
-                            {r.eventName && <span className="text-sm font-medium text-gray-700">{r.eventName}</span>}
+                            <span className="text-sm font-medium text-gray-700">{(r.details || []).length} evento(s)</span>
                         </div>
                         <div className="space-y-2 text-sm text-gray-600">
-                            <p><span className="font-medium">Fecha:</span> {r.eventDate}</p>
-                            <p><span className="font-medium">Hora:</span> {r.startTime?.substring(0, 5)} - {r.endTime?.substring(0, 5)}</p>
-                            <p><span className="font-medium">Personas:</span> {r.totalPeople}</p>
+                            {(r.details || []).map((d: any, i: number) => (
+                                <div key={i} className={i > 0 ? 'pt-2 border-t border-gray-100 mt-2' : ''}>
+                                    <p><span className="font-medium">Evento:</span> {d.eventName}</p>
+                                    <p><span className="font-medium">Fecha:</span> {d.eventDate} | <span className="font-medium">Hora:</span> {d.startTime?.substring(0, 5)} - {d.endTime?.substring(0, 5)}</p>
+                                    <p><span className="font-medium">Invitados:</span> {d.totalPeople}</p>
+                                    {d.notes && <p><span className="font-medium">Notas:</span> {d.notes}</p>}
+                                </div>
+                            ))}
                             <p><span className="font-medium">Monto:</span> S/ {r.totalAmount?.toFixed(2)}</p>
-                            {r.notes && <p><span className="font-medium">Notas:</span> {r.notes}</p>}
                         </div>
                         <div className="flex gap-2 mt-4 pt-3 border-t">
                             {!showDeleted ? (
@@ -206,7 +248,7 @@ export default function EventReservationsPage() {
             </div>
 
             <Modal open={modal.open} onClose={() => setModal({ open: false })} title={modal.edit ? 'Editar Reserva de Evento' : 'Nueva Reserva de Evento'}>
-                <div className="space-y-4">
+                <div className="space-y-4 max-h-[70vh] overflow-y-auto">
                     {serverError && <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">{serverError}</div>}
                     <div className="flex flex-col gap-1">
                         <label className="text-sm font-medium text-gray-700">Cliente</label>
@@ -216,24 +258,48 @@ export default function EventReservationsPage() {
                         </select>
                         {errors.customerId && <span className="text-xs text-red-600">{errors.customerId}</span>}
                     </div>
-                    <div className="flex flex-col gap-1">
-                        <label className="text-sm font-medium text-gray-700">Evento</label>
-                        <select value={form.eventId} onChange={e => { setForm(f => ({ ...f, eventId: e.target.value })); validate('eventId', e.target.value); }} className="border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 border-gray-300">
-                            <option value="">Seleccionar evento</option>
-                            {events.map((e: any) => <option key={e.id} value={e.id}>{e.name} (Cap: {e.maxCapacity})</option>)}
-                        </select>
-                        {errors.eventId && <span className="text-xs text-red-600">{errors.eventId}</span>}
+
+                    <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                            <label className="text-sm font-medium text-gray-700">Eventos</label>
+                            <Button size="sm" variant="ghost" onClick={addDetail}>+ Agregar evento</Button>
+                        </div>
+                        {details.map((d, idx) => (
+                            <div key={d.id} className="border rounded-lg p-3 bg-gray-50 space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-xs font-medium text-gray-500">Evento {idx + 1}</span>
+                                    {details.length > 1 && <button onClick={() => removeDetail(d.id)} className="text-red-500 text-xs">✕</button>}
+                                </div>
+                                <select value={d.eventId} onChange={e => updateDetail(d.id, 'eventId', e.target.value)}
+                                    className="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 border-gray-300">
+                                    <option value="">Seleccionar evento</option>
+                                    {events.map((e: any) => <option key={e.id} value={e.id}>{e.name} (Cap: {e.maxCapacity})</option>)}
+                                </select>
+                                <Input label="Fecha" type="date" value={d.eventDate} onChange={e => updateDetail(d.id, 'eventDate', e.target.value)} />
+                                <div className="grid grid-cols-2 gap-2">
+                                    <Input label="Inicio" type="time" value={d.startTime} onChange={e => updateDetail(d.id, 'startTime', e.target.value)} />
+                                    <Input label="Fin" type="time" value={d.endTime} onChange={e => updateDetail(d.id, 'endTime', e.target.value)} />
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <Input label="Invitados" type="number" value={String(d.totalPeople)} onChange={e => updateDetail(d.id, 'totalPeople', Number(e.target.value))} min={1} />
+                                    <Input label="Notas" value={d.notes} onChange={e => updateDetail(d.id, 'notes', e.target.value)} />
+                                </div>
+                                {d.startTime && d.endTime && (
+                                    <p className="text-xs text-gray-500">{d.quantityHours}h · {d.reservationType === 'dia' ? 'Día completo' : 'Por hora'}</p>
+                                )}
+                                {d.conflictMsg && <p className="text-xs text-yellow-700 bg-yellow-50 p-1 rounded">⚠️ {d.conflictMsg}</p>}
+                            </div>
+                        ))}
                     </div>
-                    <Input label="Fecha" type="date" value={form.eventDate} onChange={e => { setForm(f => ({ ...f, eventDate: e.target.value })); validate('eventDate', e.target.value); }} error={errors.eventDate} />
-                    <div className="grid grid-cols-2 gap-3">
-                        <Input label="Hora inicio" type="time" value={form.startTime} onChange={e => { setForm(f => ({ ...f, startTime: e.target.value })); validate('startTime', e.target.value); }} />
-                        <Input label="Hora fin" type="time" value={form.endTime} onChange={e => { setForm(f => ({ ...f, endTime: e.target.value })); validate('endTime', e.target.value); }} error={errors.endTime} />
-                    </div>
-                    <Input label="Personas" type="number" value={String(form.totalPeople)} onChange={e => { setForm(f => ({ ...f, totalPeople: Number(e.target.value) })); validate('totalPeople', Number(e.target.value)); }} error={errors.totalPeople} min={1} max={selectedEvent?.maxCapacity || 999} />
-                    <div className="flex flex-col gap-1">
-                        <label className="text-sm font-medium text-gray-700">Notas</label>
-                        <textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={3} className="border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 border-gray-300" />
-                    </div>
+
+                    {modal.edit && (
+                        <div className="flex flex-col gap-1">
+                            <label className="text-sm font-medium text-gray-700">Estado</label>
+                            <select value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))} className="border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 border-gray-300">
+                                {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                            </select>
+                        </div>
+                    )}
                     <div className="flex justify-end gap-2 pt-2">
                         <Button variant="secondary" onClick={() => setModal({ open: false })}>Cancelar</Button>
                         <Button onClick={handleSave} disabled={hasErrors}>Guardar</Button>

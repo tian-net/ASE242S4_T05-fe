@@ -32,10 +32,12 @@ export default function MyReservationsPage() {
 
     const canEdit = (r: any) => {
         const statusOk = r.status === 'pendiente' || r.status === 'Planificado';
-        const eventDate = new Date(r.eventDate);
+        const earliestDate = (r.details || []).length > 0
+            ? new Date(Math.min(...(r.details || []).map((d: any) => new Date(d.eventDate + 'T00:00:00').getTime())))
+            : new Date('2099-01-01');
         const minDate = new Date();
         minDate.setDate(minDate.getDate() + 2);
-        return statusOk && eventDate >= minDate;
+        return statusOk && earliestDate >= minDate;
     };
 
     if (loading) return <div className="text-center py-8 text-gray-400">Cargando...</div>;
@@ -51,14 +53,16 @@ export default function MyReservationsPage() {
                     <Card key={r.id} className="relative">
                         <div className="flex items-center justify-between mb-3">
                             <Badge className={STATUS_COLORS[r.status] || 'bg-gray-100 text-gray-800'}>{r.status}</Badge>
-                            {r.eventName && <span className="text-sm font-medium text-gray-700">{r.eventName}</span>}
                         </div>
                         <div className="space-y-2 text-sm text-gray-600">
-                            <p><span className="font-medium">Fecha:</span> {r.eventDate}</p>
-                            <p><span className="font-medium">Hora:</span> {r.startTime?.substring(0, 5)} - {r.endTime?.substring(0, 5)}</p>
-                            <p><span className="font-medium">Personas:</span> {r.totalPeople}</p>
+                            {(r.details || []).map((d: any, i: number) => (
+                                <div key={i} className="border-b border-gray-100 pb-2 mb-1 last:border-0">
+                                    <p className="font-medium text-gray-800">{d.eventName || 'Evento'}</p>
+                                    <p>{d.eventDate} · {d.startTime?.substring(0, 5)} - {d.endTime?.substring(0, 5)}</p>
+                                    <p><span className="font-medium">Invitados:</span> {d.totalPeople} {d.notes && <span>· Notas: {d.notes}</span>}</p>
+                                </div>
+                            ))}
                             <p><span className="font-medium">Monto:</span> S/ {r.totalAmount?.toFixed(2)}</p>
-                            {r.notes && <p><span className="font-medium">Notas:</span> {r.notes}</p>}
                         </div>
                         <div className="flex gap-2 mt-4 pt-3 border-t">
                             {canEdit(r) && (

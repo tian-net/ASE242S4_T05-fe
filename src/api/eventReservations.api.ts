@@ -36,6 +36,17 @@ export const updateEventReservationApi = async (id: string, reservation: Partial
     return data;
 };
 
+export const checkEventAvailabilityApi = async (params: {
+    eventDate: string;
+    startTime?: string;
+    endTime?: string;
+    reservationType: string;
+    excludeId?: string;
+}): Promise<{ available: boolean; conflicts: Array<{ message: string }> }> => {
+    const { data } = await api.get('/event-reservations/check-availability', { params });
+    return data;
+};
+
 export const cancelEventReservationApi = async (id: string): Promise<void> => {
     await api.patch(`/event-reservations/logical/${id}`);
 };
