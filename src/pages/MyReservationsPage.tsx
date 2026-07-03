@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../features/auth/useAuth';
 import { fetchMyEventReservationsApi, cancelEventReservationApi } from '../api/eventReservations.api';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';

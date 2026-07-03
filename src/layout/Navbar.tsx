@@ -1,4 +1,4 @@
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../features/auth/useAuth';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const adminNav = [

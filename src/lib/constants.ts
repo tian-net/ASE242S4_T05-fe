@@ -1,4 +1,4 @@
-export const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8087/api';
+export const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://35.172.21.255:30001/api';
 
 export const TOKEN_KEY = 'auth_token';
 export const USER_KEY = 'auth_user';
