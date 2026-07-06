@@ -11,7 +11,7 @@ import { Input } from '../components/ui/Input';
 import { SearchBar } from '../components/ui/search-bar';
 import { FilterSelect } from '../components/ui/filter-select';
 import { STATUS_COLORS } from '../lib/constants';
-import { required, positiveNumber } from '../lib/validation';
+import { required } from '../lib/validation';
 
 const STATUSES = ['Planificado', 'pendiente', 'Confirmado', 'Cancelado', 'En curso', 'Finalizado'];
 
@@ -44,8 +44,6 @@ export default function EventReservationsPage() {
     const [serverError, setServerError] = useState('');
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
-    const [dateFrom, setDateFrom] = useState('');
-    const [dateTo, setDateTo] = useState('');
     const list = showDeleted ? deleted : reservations;
 
     const load = async () => {
@@ -192,11 +190,6 @@ export default function EventReservationsPage() {
         const matchStatus = !statusFilter || r.status === statusFilter;
         return matchSearch && matchStatus;
     });
-
-    const getEventLabel = (eventId: string) => {
-        const ev = events.find(e => e.id === eventId);
-        return ev ? ev.name : eventId;
-    };
 
     if (loading) return <div className="text-center py-8 text-gray-400">Cargando...</div>;
 

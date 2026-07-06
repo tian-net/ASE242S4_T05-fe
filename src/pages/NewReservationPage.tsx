@@ -8,7 +8,6 @@ import { checkEventAvailabilityApi, createEventReservationApi } from '../api/eve
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Stepper } from '../components/ui/Stepper';
-import { positiveNumber } from '../lib/validation';
 import { MINIMUM_HOURS } from '../lib/constants';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
@@ -43,8 +42,7 @@ export default function NewReservationPage() {
     const [loading, setLoading] = useState(false);
     const [tables, setTables] = useState<any[]>([]);
     const [date, setDate] = useState<Date | null>(null);
-    const [startTime, setStartTime] = useState('18:00');
-    const [endTime, setEndTime] = useState('22:00');
+    const [startTime] = useState('18:00');
 
     useEffect(() => {
         fetchActiveEnabledEventsApi().then(setEvents).catch(() => {});

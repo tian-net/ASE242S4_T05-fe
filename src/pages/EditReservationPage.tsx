@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { checkEventAvailabilityApi, fetchEventReservationByIdApi, updateEventReservationApi } from '../api/eventReservations.api';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
-import { MINIMUM_HOURS } from '../lib/constants';
 
 interface DetailEdit {
     id: number;
@@ -110,8 +109,8 @@ export default function EditReservationPage() {
                     return {
                         eventId: d.eventId,
                         eventDate: dateStr,
-                        startTime: d.startTime ? d.startTime + ':00' : null,
-                        endTime: d.endTime ? d.endTime + ':00' : null,
+                        startTime: d.startTime ? d.startTime + ':00' : '',
+                        endTime: d.endTime ? d.endTime + ':00' : '',
                         reservationType: d.reservationType,
                         quantityHours: d.quantityHours,
                         totalPeople: d.totalPeople,
