@@ -13,7 +13,7 @@ import { FilterSelect } from '../components/ui/filter-select';
 import { STATUS_COLORS } from '../lib/constants';
 import { required } from '../lib/validation';
 
-const STATUSES = ['Planificado', 'pendiente', 'Confirmado', 'Cancelado', 'cancelada', 'En curso', 'Finalizado'];
+const STATUSES = ['Planificado', 'Pendiente', 'Confirmado', 'Cancelado', 'En curso', 'Finalizado'];
 
 interface DetailForm {
     id: number;
