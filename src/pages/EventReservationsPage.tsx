@@ -13,7 +13,21 @@ import { FilterSelect } from '../components/ui/filter-select';
 import { STATUS_COLORS } from '../lib/constants';
 import { required } from '../lib/validation';
 
-const STATUSES = ['Planificado', 'Pendiente', 'Confirmado', 'Cancelado', 'En curso', 'Finalizado'];
+const STATUS_NORMALIZE: Record<string, string> = {
+    PENDING: 'Pendiente',
+    Planificado: 'Pendiente',
+    pendiente: 'Pendiente',
+    CONFIRMED: 'Confirmado',
+    Confirmado: 'Confirmado',
+    CANCELLED: 'Cancelado',
+    Cancelado: 'Cancelado',
+    cancelada: 'Cancelado',
+    COMPLETED: 'Finalizado',
+    Finalizado: 'Finalizado',
+    'En curso': 'En curso',
+};
+
+const STATUSES = ['Pendiente', 'Confirmado', 'Cancelado', 'Finalizado', 'En curso'];
 
 interface DetailForm {
     id: number;
@@ -125,7 +139,7 @@ export default function EventReservationsPage() {
 
     const openEdit = (r: any) => {
         Promise.all([fetchCustomersApi(), fetchActiveEnabledEventsApi()]).then(([c, e]) => { setCustomers(c); setEvents(e); }).catch(() => {});
-        setForm({ customerId: r.customerId, status: r.status || '' });
+        setForm({ customerId: r.customerId, status: STATUS_NORMALIZE[r.status] || r.status || '' });
         setDetails((r.details || []).map((d: any, i: number) => ({
             id: i,
             eventId: d.eventId,
@@ -187,7 +201,7 @@ export default function EventReservationsPage() {
         const s = search.toLowerCase();
         const eventNames = (r.details || []).map((d: any) => (d.eventName || '').toLowerCase()).join(' ');
         const matchSearch = !s || eventNames.includes(s);
-        const matchStatus = !statusFilter || r.status?.toLowerCase() === statusFilter.toLowerCase();
+        const matchStatus = !statusFilter || (r.status && STATUS_NORMALIZE[r.status]) === statusFilter;
         return matchSearch && matchStatus;
     });
 
@@ -211,7 +225,7 @@ export default function EventReservationsPage() {
                 {filtered.map((r: any) => (
                     <Card key={r.id} className="relative">
                         <div className="flex items-center justify-between mb-3">
-                            <Badge className={STATUS_COLORS[r.status] || 'bg-gray-100 text-gray-800'}>{r.status}</Badge>
+                            <Badge className={STATUS_COLORS[r.status] || 'bg-gray-100 text-gray-800'}>{STATUS_NORMALIZE[r.status] || r.status}</Badge>
                             <span className="text-sm font-medium text-gray-700">{(r.details || []).length} evento(s)</span>
                         </div>
                         <div className="space-y-2 text-sm text-gray-600">

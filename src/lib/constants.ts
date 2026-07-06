@@ -4,11 +4,15 @@ export const TOKEN_KEY = 'auth_token';
 export const USER_KEY = 'auth_user';
 
 export const STATUS_COLORS: Record<string, string> = {
+    PENDING: 'bg-yellow-100 text-yellow-800',
     Planificado: 'bg-blue-100 text-blue-800',
     pendiente: 'bg-yellow-100 text-yellow-800',
+    CONFIRMED: 'bg-green-100 text-green-800',
     Confirmado: 'bg-green-100 text-green-800',
+    CANCELLED: 'bg-red-100 text-red-800',
     Cancelado: 'bg-red-100 text-red-800',
     cancelada: 'bg-red-100 text-red-800',
+    COMPLETED: 'bg-gray-100 text-gray-800',
     'En curso': 'bg-purple-100 text-purple-800',
     Finalizado: 'bg-gray-100 text-gray-800',
 };
