@@ -13,7 +13,7 @@ import { FilterSelect } from '../components/ui/filter-select';
 import { STATUS_COLORS } from '../lib/constants';
 import { required } from '../lib/validation';
 
-const STATUSES = ['Planificado', 'pendiente', 'Confirmado', 'Cancelado', 'En curso', 'Finalizado'];
+const STATUSES = ['Planificado', 'pendiente', 'Confirmado', 'Cancelado', 'cancelada', 'En curso', 'Finalizado'];
 
 interface DetailForm {
     id: number;
@@ -187,7 +187,7 @@ export default function EventReservationsPage() {
         const s = search.toLowerCase();
         const eventNames = (r.details || []).map((d: any) => (d.eventName || '').toLowerCase()).join(' ');
         const matchSearch = !s || eventNames.includes(s);
-        const matchStatus = !statusFilter || r.status === statusFilter;
+        const matchStatus = !statusFilter || r.status?.toLowerCase() === statusFilter.toLowerCase();
         return matchSearch && matchStatus;
     });
 
