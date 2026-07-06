@@ -3,11 +3,11 @@ import { useEvents } from '../hooks/useEvent';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
-import { ConfirmDialog } from '../components/ui/confirm-dialog';
+import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { Badge } from '../components/ui/Badge';
 import { DataTable } from '../components/shared/DataTable';
-import { SearchBar } from '../components/ui/search-bar';
-import { FilterSelect } from '../components/ui/filter-select';
+import { SearchBar } from '../components/ui/SearchBar';
+import { FilterSelect } from '../components/ui/FilterSelect';
 import { required, positiveNumber, nonNegative } from '../lib/validation';
 
 const EVENT_TYPES = ['FULL_DAY', 'ALQUILER_POR_HORA', 'CUMPLEANOS', 'BODA', 'MATRIMONIO', 'BABY_SHOWER', 'DESPEDIDA', 'GRADO', 'GARANTIA', 'CONFERENCIA'];

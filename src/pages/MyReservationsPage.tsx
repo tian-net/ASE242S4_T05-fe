@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../features/auth/useAuth';
+import { useAuth } from '../hooks/useAuth';
 import { fetchMyEventReservationsApi, cancelEventReservationApi } from '../api/eventReservations.api';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { Card } from '../components/ui/Card';
-import { ConfirmDialog } from '../components/ui/confirm-dialog';
+import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { STATUS_COLORS } from '../lib/constants';
 import { useNavigate } from 'react-router-dom';
 

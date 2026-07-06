@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { AuthResponse } from '../../types/AuthResponse';
-import { loginApi } from '../../api/auth.api';
-import { TOKEN_KEY, USER_KEY } from '../../lib/constants';
-import { AuthContext } from './useAuth';
+import type { AuthResponse } from '../types/AuthResponse';
+import { loginApi } from '../api/auth.api';
+import { TOKEN_KEY, USER_KEY } from '../lib/constants';
+import { AuthContext } from '../hooks/useAuth';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<AuthResponse | null>(null);

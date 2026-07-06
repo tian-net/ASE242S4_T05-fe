@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../features/auth/useAuth';
+import { useAuth } from '../hooks/useAuth';
 import { fetchActiveEnabledEventsApi } from '../api/events.api';
 import { fetchReservableTablesApi } from '../api/tables.api';
 import { createReservationApi } from '../api/reservations.api';

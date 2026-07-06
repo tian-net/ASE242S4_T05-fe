@@ -6,10 +6,10 @@ import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { Card } from '../components/ui/Card';
 import { Modal } from '../components/ui/Modal';
-import { ConfirmDialog } from '../components/ui/confirm-dialog';
+import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { Input } from '../components/ui/Input';
-import { SearchBar } from '../components/ui/search-bar';
-import { FilterSelect } from '../components/ui/filter-select';
+import { SearchBar } from '../components/ui/SearchBar';
+import { FilterSelect } from '../components/ui/FilterSelect';
 import { STATUS_COLORS } from '../lib/constants';
 import { required } from '../lib/validation';
 
