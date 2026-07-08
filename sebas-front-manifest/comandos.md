@@ -3,7 +3,8 @@
 ## Build de la imagen Docker
 ```bash
 # Desde la raíz de front-chino
-docker build -t front-chino:latest .
+docker build -t luisfelipe1432/frontend-nosql:1.0 .
+docker push luisfelipe1432/frontend-nosql:1.0
 ```
 
 ## Aplicar manifiestos

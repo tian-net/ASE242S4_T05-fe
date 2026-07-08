@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: front-chino
-  namespace: elchino
+  name: frontend
+  namespace: luis-felipe-09-namespace
   labels:
-    app: front-chino
+    app: frontend
 spec:
   type: NodePort
   ports:
@@ -14,4 +14,4 @@ spec:
       name: http
       nodePort: 30080
   selector:
-    app: front-chino
+    app: frontend
