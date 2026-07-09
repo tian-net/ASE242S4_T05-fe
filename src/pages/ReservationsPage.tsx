@@ -20,16 +20,39 @@ export default function ReservationsPage() {
     const [confirm, setConfirm] = useState<{ open: boolean; title: string; message: string; onConfirm: () => void }>({ open: false, title: '', message: '', onConfirm: () => {} });
     const [customers, setCustomers] = useState<any[]>([]);
     const [tables, setTables] = useState<any[]>([]);
-    const [form, setForm] = useState({ customerId: '', resDate: '', resTime: '', numPeople: 4, selectedTables: [] as string[] });
+    const [form, setForm] = useState({ customerId: '', resDate: '', resTime: '', numPeople: 4, totalAmt: 0, selectedTables: [] as string[] });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
+    const [dateFilter, setDateFilter] = useState('');
+
+    const tableMap = Object.fromEntries(tables.map((t: any) => [t.id, t]));
+    const customerMap = Object.fromEntries(customers.map((c: any) => [c.id, c]));
+
+    const getCustomerName = (customerId: string) => {
+        const c = customerMap[customerId];
+        return c ? `${c.firstName} ${c.lastName}` : 'Desconocido';
+    };
+
+    const getTableNames = (details: any[]) => {
+        if (!details || details.length === 0) return 'Sin mesas';
+        return details.map((d: any) => {
+            const t = tableMap[d.tableId];
+            return t ? `Mesa ${t.tableNum}` : d.tableId;
+        }).join(', ');
+    };
 
     const load = async () => {
         setLoading(true);
         try {
-            const data = await fetchReservationsApi();
-            setReservations(data);
+            const [resData, custData, tblData] = await Promise.all([
+                fetchReservationsApi(),
+                fetchCustomersApi(),
+                fetchTablesApi(),
+            ]);
+            setReservations(resData);
+            setCustomers(custData);
+            setTables(tblData);
         } catch {
             setReservations([]);
         } finally { setLoading(false); }
@@ -44,6 +67,7 @@ export default function ReservationsPage() {
             case 'resDate': newErrors.resDate = futureDate(value, 1) || ''; break;
             case 'resTime': newErrors.resTime = required(value, 'Hora') || ''; break;
             case 'numPeople': newErrors.numPeople = positiveNumber(value, 'Personas') || ''; break;
+            case 'totalAmt': newErrors.totalAmt = positiveNumber(value, 'Monto') || ''; break;
             case 'selectedTables': newErrors.selectedTables = value.length === 0 ? 'Selecciona al menos una mesa' : ''; break;
         }
         setErrors(newErrors);
@@ -51,7 +75,7 @@ export default function ReservationsPage() {
 
     const openCreate = () => {
         Promise.all([fetchCustomersApi(), fetchTablesApi()]).then(([c, t]) => { setCustomers(c); setTables(t.filter((tbl: any) => tbl.isReservable !== false)); }).catch(() => {});
-        setForm({ customerId: '', resDate: '', resTime: '', numPeople: 4, selectedTables: [] });
+        setForm({ customerId: '', resDate: '', resTime: '', numPeople: 4, totalAmt: 0, selectedTables: [] });
         setErrors({});
         setModal({ open: true });
     };
@@ -63,6 +87,7 @@ export default function ReservationsPage() {
             resDate: r.resDate,
             resTime: r.resTime?.substring(0, 5) || '',
             numPeople: r.numPeople,
+            totalAmt: r.totalAmt || 0,
             selectedTables: r.details?.map((d: any) => d.tableId) || [],
         });
         setErrors({});
@@ -85,6 +110,7 @@ export default function ReservationsPage() {
         errs.resDate = futureDate(form.resDate, 1) || '';
         errs.resTime = required(form.resTime, 'Hora') || '';
         errs.numPeople = positiveNumber(form.numPeople, 'Personas') || '';
+        errs.totalAmt = positiveNumber(form.totalAmt, 'Monto') || '';
         errs.selectedTables = form.selectedTables.length === 0 ? 'Selecciona al menos una mesa' : '';
         setErrors(errs);
         if (Object.values(errs).some(Boolean)) return;
@@ -94,6 +120,7 @@ export default function ReservationsPage() {
             resDate: form.resDate,
             resTime: form.resTime,
             numPeople: form.numPeople,
+            totalAmt: form.totalAmt,
             details: form.selectedTables.map(id => ({ tableId: id, notes: '' })),
         };
         if (modal.edit) {
@@ -117,9 +144,11 @@ export default function ReservationsPage() {
 
     const filtered = reservations.filter((r: any) => {
         const s = search.toLowerCase();
-        const matchSearch = !s || r.resDate?.includes(s);
+        const customerName = getCustomerName(r.customerId).toLowerCase();
+        const matchSearch = !s || customerName.includes(s) || r.resDate?.includes(s);
         const matchStatus = !statusFilter || r.status === statusFilter || (!r.status && statusFilter === 'Pendiente');
-        return matchSearch && matchStatus;
+        const matchDate = !dateFilter || r.resDate === dateFilter;
+        return matchSearch && matchStatus && matchDate;
     });
 
     if (loading) return <div className="text-center py-8 text-gray-400">Cargando...</div>;
@@ -131,8 +160,28 @@ export default function ReservationsPage() {
                 <Button onClick={openCreate}>+ Nueva</Button>
             </div>
             <div className="flex flex-wrap items-center gap-3 mb-4">
-                <SearchBar value={search} onChange={setSearch} placeholder="Buscar fecha..." />
-                <FilterSelect label="Estado" value={statusFilter} onChange={setStatusFilter} options={[{ value: '', label: 'Todos' }, { value: 'Pendiente', label: 'Pendiente' }, { value: 'Confirmada', label: 'Confirmada' }, { value: 'Cancelada', label: 'Cancelada' }, { value: 'Atendida', label: 'Atendida' }]} />
+                <SearchBar value={search} onChange={setSearch} placeholder="Buscar por nombre..." />
+                <FilterSelect label="Estado" value={statusFilter} onChange={setStatusFilter} options={[
+                    { value: '', label: 'Todos' },
+                    { value: 'Pendiente', label: 'Pendiente' },
+                    { value: 'Confirmada', label: 'Confirmada' },
+                    { value: 'Atendida', label: 'Atendida' },
+                    { value: 'Pagada', label: 'Pagada' },
+                    { value: 'Cancelada', label: 'Cancelada' },
+                    { value: 'Reprogramada', label: 'Reprogramada' },
+                ]} />
+                <div className="flex items-center gap-2">
+                    <label className="text-sm font-medium text-gray-700 shrink-0">Fecha</label>
+                    <input
+                        type="date"
+                        value={dateFilter}
+                        onChange={e => setDateFilter(e.target.value)}
+                        className="border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 border-gray-300 bg-white"
+                    />
+                    {dateFilter && (
+                        <button onClick={() => setDateFilter('')} className="text-xs text-blue-600 hover:underline">Limpiar</button>
+                    )}
+                </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -142,11 +191,12 @@ export default function ReservationsPage() {
                             <Badge className={STATUS_COLORS[r.status] || 'bg-gray-100 text-gray-800'}>{r.status || 'Pendiente'}</Badge>
                         </div>
                         <div className="space-y-2 text-sm text-gray-600">
+                            <p><span className="font-medium">Cliente:</span> {getCustomerName(r.customerId)}</p>
                             <p><span className="font-medium">Fecha:</span> {r.resDate}</p>
                             <p><span className="font-medium">Hora:</span> {r.resTime?.substring(0, 5)}</p>
                             <p><span className="font-medium">Personas:</span> {r.numPeople}</p>
                             <p><span className="font-medium">Monto:</span> S/ {r.totalAmt?.toFixed(2) || '0.00'}</p>
-                            {r.details && r.details.length > 0 && <p><span className="font-medium">Mesas:</span> {r.details.map((d: any) => d.tableId).join(', ')}</p>}
+                            {r.details && r.details.length > 0 && <p><span className="font-medium">Mesas:</span> {getTableNames(r.details)}</p>}
                         </div>
                         <div className="flex gap-2 mt-4 pt-3 border-t">
                             <Button size="sm" variant="ghost" onClick={() => openEdit(r)}>Editar</Button>
@@ -171,7 +221,10 @@ export default function ReservationsPage() {
                         <Input label="Fecha" type="date" value={form.resDate} onChange={e => { setForm(f => ({ ...f, resDate: e.target.value })); validate('resDate', e.target.value); }} error={errors.resDate} />
                         <Input label="Hora" type="time" value={form.resTime} onChange={e => { setForm(f => ({ ...f, resTime: e.target.value })); validate('resTime', e.target.value); }} error={errors.resTime} />
                     </div>
-                    <Input label="N° Personas" type="number" value={String(form.numPeople)} onChange={e => { setForm(f => ({ ...f, numPeople: Number(e.target.value) })); validate('numPeople', Number(e.target.value)); }} error={errors.numPeople} min={1} />
+                    <div className="grid grid-cols-2 gap-3">
+                        <Input label="N° Personas" type="number" value={String(form.numPeople)} onChange={e => { setForm(f => ({ ...f, numPeople: Number(e.target.value) })); validate('numPeople', Number(e.target.value)); }} error={errors.numPeople} min={1} />
+                        <Input label="Monto (S/)" type="number" value={String(form.totalAmt)} onChange={e => { setForm(f => ({ ...f, totalAmt: Number(e.target.value) })); validate('totalAmt', Number(e.target.value)); }} error={errors.totalAmt} min={0} step="0.01" />
+                    </div>
                     <div className="flex flex-col gap-1">
                         <label className="text-sm font-medium text-gray-700">Mesas disponibles</label>
                         {errors.selectedTables && <span className="text-xs text-red-600">{errors.selectedTables}</span>}
